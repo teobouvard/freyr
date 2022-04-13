@@ -13,5 +13,10 @@ jobs:
       - name: Retrieve source code
         uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang clang-tidy iwyu
+
       - name: Run pre-commit
         uses: pre-commit/action@v2.0.3
