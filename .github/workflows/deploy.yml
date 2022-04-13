@@ -1,0 +1,17 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Retrieve source code
+        uses: actions/checkout@v2
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v2.0.3
