@@ -16,6 +16,3 @@ repos:
     hooks:
     -   id: clang-format
         args: ["-i"]
-    -   id: clang-tidy
-    # Fails on GitHub CI because headers are out of sync
-    # -   id: include-what-you-use
