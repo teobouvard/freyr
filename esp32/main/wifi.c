@@ -27,7 +27,7 @@
 #define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WAPI_PSK
 #endif
 
-static const char *TAG = "wifi_connect";
+static const char *TAG = "app_wifi";
 static int n_retries = 0;
 
 static void on_wifi_start(void *arg, esp_event_base_t event_base,
@@ -70,6 +70,9 @@ void wifi_connect(void) {
 
   // Create event loop
   ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+  // Create default WiFi station
+  esp_netif_create_default_wifi_sta();
 
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
