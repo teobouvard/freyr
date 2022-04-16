@@ -5,10 +5,11 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "mqtt.h"
 #include "nvs_flash.h"
 #include "wifi.h"
 
-static const char *TAG = "main";
+static const char *TAG = "app_main";
 
 void app_main(void) {
   esp_log_level_set("*", ESP_LOG_VERBOSE);
@@ -18,4 +19,5 @@ void app_main(void) {
   ESP_LOGI(TAG, "free memory: %d bytes", esp_get_free_heap_size());
 
   wifi_connect();
+  mqtt_connect();
 }

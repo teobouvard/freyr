@@ -42,4 +42,10 @@ menu "Application config"
             bool "WAPI PSK"
     endchoice
 
+    config ESP_MQTT_BROKER_URL
+        string "MQTT Broker URL"
+        default "mqtt://mqtt.eclipseprojects.io"
+        help
+            URL of the broker to connect to
+
 endmenu
