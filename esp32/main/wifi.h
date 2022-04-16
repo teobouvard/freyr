@@ -16,4 +16,12 @@ void wifi_connect();
  */
 const char *wifi_get_ip();
 
+/**
+ * Get current MAC address.
+ *
+ * Returns a pointer to a statically-allocated string containing the current
+ * MAC address.
+ */
+const char *wifi_get_mac();
+
 #endif /* __FREYR_WIFI_H__ */

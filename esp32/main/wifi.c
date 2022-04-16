@@ -2,6 +2,7 @@
 
 #include "esp_event.h"
 #include "esp_log.h"
+#include "esp_mac.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
@@ -31,6 +32,7 @@
 
 static const char *TAG = "app_wifi";
 static char IPV4_ADDR[] = "000.000.000.000";
+static char MAC_ADDR[] = "XX:XX:XX:XX:XX:XX";
 static int n_retries = 0;
 
 static void on_wifi_start(void *arg, esp_event_base_t event_base,
@@ -71,6 +73,10 @@ void wifi_connect(void) {
   // Initialize TCP/IP stack
   ESP_ERROR_CHECK(esp_netif_init());
 
+  uint8_t mac_addr[6];
+  ESP_ERROR_CHECK(esp_read_mac(mac_addr, ESP_MAC_WIFI_STA));
+  snprintf(MAC_ADDR, sizeof(MAC_ADDR), MACSTR, MAC2STR(mac_addr));
+
   // Create event loop
   ESP_ERROR_CHECK(esp_event_loop_create_default());
 
@@ -103,3 +109,5 @@ void wifi_connect(void) {
 }
 
 const char *wifi_get_ip() { return IPV4_ADDR; }
+
+const char *wifi_get_mac() { return MAC_ADDR; }
