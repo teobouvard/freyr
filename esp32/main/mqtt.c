@@ -8,8 +8,8 @@
 #define EXAMPLE_MQTT_BROKER_URL CONFIG_ESP_MQTT_BROKER_URL
 
 static const char *TAG = "app_mqtt";
-static const char *MQTT_PUBLISH_TOPIC_FMT = "/sensors/%s/%s";
-static const char *MQTT_SUBSCRIBE_TOPIC = "/sensors/requests";
+static const char *MQTT_PUBLISH_TOPIC_FMT = "sensors/%s/%s";
+static const char *MQTT_SUBSCRIBE_TOPIC = "sensors/requests";
 static char MQTT_PUBLISH_TOPIC[128];
 static const int MQTT_QOS = 0;
 static const int MQTT_USE_DATA_LENGTH = 0;
