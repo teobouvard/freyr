@@ -3,12 +3,14 @@
 #include "mqtt_client.h"
 
 #include "mqtt.h"
+#include "wifi.h"
 
 #define EXAMPLE_MQTT_BROKER_URL CONFIG_ESP_MQTT_BROKER_URL
 
 static const char *TAG = "app_mqtt";
-static const char *MQTT_PUBLISH_TOPIC = "/sensors/0/data";
+static const char *MQTT_PUBLISH_TOPIC_FMT = "/sensors/%s/%s";
 static const char *MQTT_SUBSCRIBE_TOPIC = "/sensors/requests";
+static char MQTT_PUBLISH_TOPIC[128];
 static const int MQTT_QOS = 0;
 static const int MQTT_USE_DATA_LENGTH = 0;
 
@@ -19,6 +21,8 @@ static void mqtt_handle_message(esp_mqtt_event_handle_t event) {
   esp_mqtt_client_handle_t client = event->client;
   printf("TOPIC: %.*s\n", event->topic_len, event->topic);
   printf("DATA: %.*s\n", event->data_len, event->data);
+  snprintf(MQTT_PUBLISH_TOPIC, sizeof(MQTT_PUBLISH_TOPIC),
+           MQTT_PUBLISH_TOPIC_FMT, wifi_get_ip(), "data");
   esp_mqtt_client_publish(client, MQTT_PUBLISH_TOPIC, "sample_data",
                           MQTT_USE_DATA_LENGTH, MQTT_QOS, 0);
 };

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -28,6 +30,7 @@
 #endif
 
 static const char *TAG = "app_wifi";
+static char IPV4_ADDR[] = "000.000.000.000";
 static int n_retries = 0;
 
 static void on_wifi_start(void *arg, esp_event_base_t event_base,
@@ -45,7 +48,7 @@ static void on_wifi_connect(void *arg, esp_event_base_t event_base,
 static void on_wifi_got_ip(void *arg, esp_event_base_t event_base,
                            int32_t event_id, void *event_data) {
   ip_event_got_ip_t *event = event_data;
-  ESP_LOGI(TAG, "got IPv4 address: " IPSTR, IP2STR(&event->ip_info.ip));
+  snprintf(IPV4_ADDR, sizeof(IPV4_ADDR), IPSTR, IP2STR(&event->ip_info.ip));
 }
 
 static void on_wifi_disconnect(void *arg, esp_event_base_t event_base,
@@ -98,3 +101,5 @@ void wifi_connect(void) {
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 }
+
+const char *wifi_get_ip() { return IPV4_ADDR; }
