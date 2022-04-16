@@ -2,13 +2,13 @@ menu "Application config"
 
     config ESP_WIFI_SSID
         string "WiFi SSID"
-        default ""
+        default "SSID"
         help
             SSID (network name) for the example to connect to.
 
     config ESP_WIFI_PASSWORD
         string "WiFi Password"
-        default ""
+        default "password"
         help
             WiFi password (WPA or WPA2) for the example to use.
 
