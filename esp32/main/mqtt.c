@@ -18,7 +18,10 @@ typedef struct {
   int msg_id;
   callback_fn_t cb;
 } msg_callback_t;
-static msg_callback_t current_callback;
+static msg_callback_t current_callback = {
+    .msg_id = -1,
+    .cb = NULL,
+};
 
 static void mqtt_set_topic(const char *topic) {
   snprintf(MQTT_PUBLISH_TOPIC, sizeof(MQTT_PUBLISH_TOPIC),
@@ -28,11 +31,10 @@ static void mqtt_set_topic(const char *topic) {
 static void on_msg_published(void *handler_args, esp_event_base_t base,
                              int32_t event_id, void *event_data) {
   esp_mqtt_event_handle_t event = event_data;
-  msg_callback_t *expected_msg_cb = handler_args;
-  ESP_LOGI(TAG, "expecting message %d, got %d", expected_msg_cb->msg_id,
-           event->msg_id);
-  if (expected_msg_cb->msg_id == event->msg_id) {
-    expected_msg_cb->cb();
+  ESP_LOGI(TAG, "published message %d", event->msg_id);
+  if (current_callback.msg_id == event->msg_id && current_callback.cb != NULL) {
+    ESP_LOGI(TAG, "running registered callback");
+    current_callback.cb();
   }
 }
 
@@ -48,10 +50,14 @@ int mqtt_send_message(esp_mqtt_client_handle_t client, const char *topic,
     return -1;
   }
 
-  current_callback.msg_id = msg_id;
-  current_callback.cb = on_sent;
-  ESP_ERROR_CHECK(esp_mqtt_client_register_event(
-      client, MQTT_EVENT_PUBLISHED, on_msg_published, &current_callback));
+  if (on_sent != NULL) {
+    ESP_LOGI(TAG, "sent message %d, registering callback", msg_id);
+    current_callback.msg_id = msg_id;
+    current_callback.cb = on_sent;
+    ESP_ERROR_CHECK(esp_mqtt_client_register_event(client, MQTT_EVENT_PUBLISHED,
+                                                   on_msg_published, NULL));
+  }
+
   return msg_id;
 }
 
@@ -59,8 +65,8 @@ static void mqtt_handle_message(esp_mqtt_event_handle_t event) {
   if (!event) {
     return;
   }
-  ESP_LOGI("TOPIC: %.*s", event->topic_len, event->topic);
-  ESP_LOGI("DATA: %.*s", event->data_len, event->data);
+  ESP_LOGI(TAG, "TOPIC: %.*s", event->topic_len, event->topic);
+  ESP_LOGI(TAG, "DATA: %.*s", event->data_len, event->data);
 };
 
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base,

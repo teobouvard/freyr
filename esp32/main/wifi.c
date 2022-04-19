@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
+#include "freertos/task.h"
+
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_mac.h"
@@ -35,6 +39,10 @@ static char IPV4_ADDR[] = "000.000.000.000";
 static char MAC_ADDR[] = "XX:XX:XX:XX:XX:XX";
 static int n_retries = 0;
 
+/* FreeRTOS event group to signal when we are connected */
+static EventGroupHandle_t wifi_event_group;
+#define WIFI_CONNECTED_BIT BIT0
+
 static void on_wifi_start(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data) {
   ESP_LOGI(TAG, "wifi started");
@@ -49,8 +57,10 @@ static void on_wifi_connect(void *arg, esp_event_base_t event_base,
 
 static void on_wifi_got_ip(void *arg, esp_event_base_t event_base,
                            int32_t event_id, void *event_data) {
+  ESP_LOGI(TAG, "got IP address");
   ip_event_got_ip_t *event = event_data;
   snprintf(IPV4_ADDR, sizeof(IPV4_ADDR), IPSTR, IP2STR(&event->ip_info.ip));
+  xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
 }
 
 static void on_wifi_disconnect(void *arg, esp_event_base_t event_base,
@@ -67,6 +77,8 @@ static void on_wifi_disconnect(void *arg, esp_event_base_t event_base,
 }
 
 void wifi_connect(void) {
+  wifi_event_group = xEventGroupCreate();
+
   // Initialize non-volatile storage used for WiFi data
   ESP_ERROR_CHECK(nvs_flash_init());
 
@@ -106,6 +118,16 @@ void wifi_connect(void) {
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
+
+  EventBits_t status = xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT,
+                                           pdFALSE, pdFALSE, portMAX_DELAY);
+
+  if (status & WIFI_CONNECTED_BIT) {
+    ESP_LOGI(TAG, "connected to wifi");
+  } else {
+    ESP_LOGI(TAG, "failed to connect to wifi");
+    esp_restart();
+  }
 }
 
 const char *wifi_get_ip() { return IPV4_ADDR; }
